@@ -7,12 +7,14 @@ interface LoginFormProps {
   onSwitchToRegister: () => void;
   onSwitchToReset: () => void;
   onSwitchToInitialAdmin?: () => void;
+  onSwitchToManagementLogin?: () => void;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   onSwitchToRegister,
   onSwitchToReset,
   onSwitchToInitialAdmin,
+  onSwitchToManagementLogin,
 }) => {
   const { login, registerManagement, initialAdminExists } = useAuth();
   const [email, setEmail] = useState('');
@@ -66,8 +68,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   return (
     <div id="login-form-container" className="space-y-5">
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-slate-900">Sign in to your account</h2>
-        <p className="text-xs text-slate-500 mt-1">Enter your registered workplace credentials to continue.</p>
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+            Inspector &amp; Staff Login
+          </span>
+          {onSwitchToManagementLogin && (
+            <button
+              type="button"
+              onClick={onSwitchToManagementLogin}
+              className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              Executive Login →
+            </button>
+          )}
+        </div>
+        <h2 className="text-xl font-bold tracking-tight text-slate-900">Workplace Sign In</h2>
+        <p className="text-xs text-slate-500 mt-0.5">Enter your inspector or actioner credentials to manage walkthroughs and tasks.</p>
       </div>
 
       {error && <AlertBanner id="login-error-banner" type="error" message={error} onDismiss={() => setError(null)} />}

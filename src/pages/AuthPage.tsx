@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/auth/LoginForm';
+import { ManagementLoginForm } from '../components/auth/ManagementLoginForm';
 import { RegisterForm } from '../components/auth/RegisterForm';
 import { PasswordResetForm } from '../components/auth/PasswordResetForm';
 import { InitialAdminSetup } from '../components/auth/InitialAdminSetup';
-import { ShieldCheck, CheckCircle2, Lock, FileText } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Lock, FileText, UserCheck } from 'lucide-react';
 
-type AuthView = 'login' | 'register' | 'reset' | 'initial-admin';
+type AuthView =
+  | 'login'
+  | 'management-login'
+  | 'register'
+  | 'register-management'
+  | 'reset'
+  | 'initial-admin';
 
 export const AuthPage: React.FC = () => {
   const { initialAdminExists } = useAuth();
@@ -18,6 +25,8 @@ export const AuthPage: React.FC = () => {
       setView('initial-admin');
     }
   }, [initialAdminExists]);
+
+  const isManagementMode = view === 'management-login' || view === 'register-management';
 
   return (
     <div id="auth-page" className="min-h-screen bg-slate-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
@@ -36,6 +45,37 @@ export const AuthPage: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Dedicated Dual Portal Mode Switcher */}
+        <div className="flex rounded-xl bg-slate-200/90 p-1 mb-4 shadow-2xs border border-slate-300">
+          <button
+            type="button"
+            id="tab-select-staff-login"
+            onClick={() => setView('login')}
+            className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              !isManagementMode
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <UserCheck className="h-3.5 w-3.5 text-amber-600" />
+            <span>Inspector &amp; Staff</span>
+          </button>
+
+          <button
+            type="button"
+            id="tab-select-mgmt-login"
+            onClick={() => setView('management-login')}
+            className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              isManagementMode
+                ? 'bg-emerald-700 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />
+            <span>Executive Management</span>
+          </button>
+        </div>
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -45,15 +85,32 @@ export const AuthPage: React.FC = () => {
               onSwitchToRegister={() => setView('register')}
               onSwitchToReset={() => setView('reset')}
               onSwitchToInitialAdmin={() => setView('initial-admin')}
+              onSwitchToManagementLogin={() => setView('management-login')}
+            />
+          )}
+
+          {view === 'management-login' && (
+            <ManagementLoginForm
+              onSwitchToStaffLogin={() => setView('login')}
+              onSwitchToRegisterManagement={() => setView('register-management')}
             />
           )}
 
           {view === 'register' && (
-            <RegisterForm onSwitchToLogin={() => setView('login')} />
+            <RegisterForm initialRole="actioner" onSwitchToLogin={() => setView('login')} />
+          )}
+
+          {view === 'register-management' && (
+            <RegisterForm
+              initialRole="management"
+              onSwitchToLogin={() => setView('management-login')}
+            />
           )}
 
           {view === 'reset' && (
-            <PasswordResetForm onSwitchToLogin={() => setView('login')} />
+            <PasswordResetForm
+              onSwitchToLogin={() => setView(isManagementMode ? 'management-login' : 'login')}
+            />
           )}
 
           {view === 'initial-admin' && (

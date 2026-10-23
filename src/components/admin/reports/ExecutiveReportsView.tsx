@@ -74,6 +74,29 @@ export const ExecutiveReportsView: React.FC<ExecutiveReportsViewProps> = ({
     return true;
   });
 
+  const handleExportCsv = () => {
+    if (filteredInspections.length === 0) return;
+    const headers = ['Inspection Number', 'Title', 'Department', 'Date', 'Inspector', 'Status', 'General Comments'];
+    const rows = filteredInspections.map((i) => [
+      `"${i.inspectionNumber || ''}"`,
+      `"${(i.title || '').replace(/"/g, '""')}"`,
+      `"${(i.departmentNameSnapshot || '').replace(/"/g, '""')}"`,
+      `"${i.inspectionDate || ''}"`,
+      `"${(i.inspectorNameSnapshot || '').replace(/"/g, '""')}"`,
+      `"${i.status || ''}"`,
+      `"${(i.generalComments || '').replace(/"/g, '""')}"`,
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `SHEQ-Audit-Reports-Summary-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const completedCount = inspections.filter((i) => i.status === 'Completed').length;
   const draftCount = inspections.filter((i) => i.status === 'Draft').length;
 
@@ -95,15 +118,28 @@ export const ExecutiveReportsView: React.FC<ExecutiveReportsViewProps> = ({
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={loadData}
-          disabled={loading}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 cursor-pointer disabled:opacity-50 transition-colors shadow-2xs self-start sm:self-auto"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh Directory
-        </button>
+        <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            disabled={filteredInspections.length === 0}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 cursor-pointer disabled:opacity-50 transition-colors shadow-2xs"
+            title="Export filtered inspection reports directory as CSV spreadsheet"
+          >
+            <Download className="h-3.5 w-3.5 text-emerald-600" />
+            Export CSV Summary
+          </button>
+
+          <button
+            type="button"
+            onClick={loadData}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 cursor-pointer disabled:opacity-50 transition-colors shadow-2xs"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh Directory
+          </button>
+        </div>
       </div>
 
       {/* Summary KPI Ribbon */}

@@ -5,11 +5,12 @@ import { User, Mail, Lock, Loader2, ArrowLeft, CheckCircle2, ShieldCheck } from 
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void;
+  initialRole?: 'actioner' | 'management';
 }
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
+export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, initialRole = 'actioner' }) => {
   const { registerActioner, registerManagement } = useAuth();
-  const [role, setRole] = useState<'actioner' | 'management'>('actioner');
+  const [role, setRole] = useState<'actioner' | 'management'>(initialRole);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
